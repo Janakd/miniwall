@@ -3,9 +3,11 @@ works with arduinoCapWall4 to plot data
  */
 
 import processing.serial.*;
-int MODE_TOUCH = 0;
-int MODE_CREDIT = 1 ; 
-int MODE_FEE = 2; 
+final int MODE_TOUCH = 0;
+final int MODE_CREDIT = 1 ; 
+final int MODE_FEE = 2; 
+
+int mode;
 
 //// plotting 
 float xPos  = 0 ; 
@@ -38,6 +40,8 @@ int jsonInd;
 Bar[] bars; 
 
 void setup() {
+
+  mode = 0 ; //glow mode by default 
   //fullScreen();
   size (1000, 1000);
   background(255); 
@@ -70,13 +74,13 @@ void setup() {
   // this is to one line of data from processing 
   allChannels = new int[TOTOAL_CARDS];
   wallValues = new float[TOTOAL_CARDS]; //potentially hold more values 
-  
+
   //initializing card objects 
   cards = new Card[TOTOAL_CARDS];
   //create some bars 
   //bar = new Bar (100.0,200.0); 
   bars = new Bar [TOTOAL_CARDS]; 
-  
+
   for (int i = 0; i < TOTOAL_CARDS; i++ ) {
     allChannels[i] = i;
     cards[i] = new Card (i);
@@ -88,29 +92,28 @@ void setup() {
     cards[i].rewards = xmlCards[i].getString("rewards");
     cards[i].credit = xmlCards[i].getFloat("credit");
     cards[i].annual = xmlCards[i].getFloat("annual");
-    
+
     bars[i] = new Bar(cards[i].x, cards[i].y, cards[i].credit);
-    
-    bars[i] = new Bar(cards[i].x, cards[i].y, cards[i].annual); 
+
+    bars[i] = new Bar(cards[i].x, cards[i].y, cards[i].annual);
   }
-  
+
   // taking care of saving json file 
   prepareExitHandler(); //so that exit function is called 
   json = new JSONArray();
-  jsonInd = 0 ; 
-
+  jsonInd = 0 ;
 }
 
 void draw() {
-  if(ISDEBUGGING){
+  if (ISDEBUGGING) {
     // check on all the cards 
     for (int i = 0; i < TOTOAL_CARDS; i++ ) {
       //TODO  shall this be called only at new Serial event to be faster ? 
       cards[i].update();
-      
-     
-      
-      if (cards[i].touchEvent == 10){
+
+
+
+      if (cards[i].touchEvent == 10) {
         //start touch event 
         JSONObject temp = new JSONObject();
         int m = millis(); 
@@ -120,7 +123,7 @@ void draw() {
         json.setJSONObject(jsonInd, temp);
         jsonInd++; 
         println("i: "+i + " start: " + m);
-      }else if(cards[i].touchEvent == 12){
+      } else if (cards[i].touchEvent == 12) {
         //end touch event 
         JSONObject temp = new JSONObject();
         int m = millis(); 
@@ -129,36 +132,40 @@ void draw() {
         temp.setInt("time", m);
         json.setJSONObject(jsonInd, temp);
         jsonInd++; 
-        
+
         println("i: "+i + " end: " + m);
       }
     }
-    
-  
-    
-  
+
+
+
+
     //plotSerialData();
     // plotSerialData(channels); 
     plotSerialData(allChannels);
-    
   }
-  
+
   ///CX 
   else {
-       //draw the cards here! 
+    //draw the cards here! 
     background(0); 
     for (int i = 0; i < TOTOAL_CARDS; i++ ) {
-      //TODO  shall this be called only at new Serial event to be faster ? 
-      cards[i].update();
-      cards[i].render(); 
-       
-       //draw bars
-      bars[i].update();
-      bars[i].render();
+      //      switch 
+      switch(mode) {
+      case MODE_TOUCH: 
+        //glow cards 
+        cards[i].update();
+        cards[i].render(); 
+
+        break; 
+
+      case MODE_CREDIT:
+        //draw Credit bars
+        bars[i].update();
+        bars[i].render();
+        break;
+      }
     }
-    
-    
-   
   }
 }
 
@@ -182,17 +189,15 @@ void serialEvent(Serial myPort) {
       //source -> dest 
       arrayCopy(values, wallValues);
 
-     for (int i = 0; i < TOTOAL_CARDS; i++ ) {
-    
+      for (int i = 0; i < TOTOAL_CARDS; i++ ) {
+
         cards[i].addNewData(wallValues[i]) ;
-        
       }
-    
-    }else{
+    } else {
       // String s = "Mismatch:  TOTOAL_CARDS" + TOTOAL_CARDS 
       //   + "array size " + values.length ; 
-        
-      // println(s); 
+
+      // println(s);
     }
   }
 }
@@ -211,25 +216,22 @@ void plotSerialData() {
 
   if (xPos >= plotWidth) {
     xPos = 0 ;
-     repaint(); 
+    repaint();
   } else {
     xPos ++ ;
   }
-
-
 }
 
-void repaint(){
-   fill(255); 
-    // rect(0, 0, plotWidth, plotWindowY   );  //repaint the graph area
+void repaint() {
+  fill(255); 
+  // rect(0, 0, plotWidth, plotWindowY   );  //repaint the graph area
 
-    rect(0, 0, plotWidth, height   );  //repaint the graph area
-   
+  rect(0, 0, plotWidth, height   );  //repaint the graph area
 }
 
 
 void saveToJson() {
-// } void keyPressed() {
+  // } void keyPressed() {
   String s = "data/"; 
   s += String.valueOf(year());
   s += String.valueOf(month()); 
@@ -238,7 +240,7 @@ void saveToJson() {
   s += String.valueOf(minute()); 
   s += ".json"; 
   saveJSONArray(json, s);
-  println("save to "+s); 
+  println("save to "+s);
 }
 
 
@@ -247,9 +249,10 @@ private void prepareExitHandler () {
     public void run () {
       // System.out.println("SHUTDOWN HOOK");
       // application exit code here
-      saveToJson(); 
+      saveToJson();
     }
-  }));
+  }
+  ));
 }
 
 
@@ -261,14 +264,16 @@ void plotSerialData(int[] array) {
     // plotReadings 
     fill(cards[k].fillColor) ; 
     ellipse ( xPos, -cards[k].hoverScale * yScale  + plotWindowY - 10, 2, 2);  
-  //  print(k +" " + -cards[k].hoverScale +"\t " );
-    
+    //  print(k +" " + -cards[k].hoverScale +"\t " );
   }
   //println(); 
   if (xPos >= plotWidth) {
     xPos = 0 ;
-   repaint(); 
+    repaint();
   } else {
     xPos ++ ;
   }
 }
+
+
+

@@ -20,7 +20,21 @@ void keyPressed() {
         }
 
     }
-  } 
+  }
+  else if (key == '0'){
+  mode = MODE_TOUCH;
+  println("mode = touch");
+  }
+  else if (key == '1'){
+  mode = MODE_CREDIT;
+  println("mode = credit score");  
+  }
+  else if (key == '2'){
+  mode = MODE_FEE;
+  println("mode = annual fee");  
+  }
+  
+  
   else if (key == 'c' || key == 'C'){
     ISDEBUGGING = !ISDEBUGGING ; 
   }
