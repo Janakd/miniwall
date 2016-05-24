@@ -27,10 +27,18 @@ void keyPressed() {
   }
   else if (key == '1'){
   mode = MODE_CREDIT;
+  
+  for (int i = 0; i < TOTOAL_CARDS; i++ ){
+  bars[i].currentHeight = 0;}
+  
   println("mode = credit score");  
   }
   else if (key == '2'){
   mode = MODE_FEE;
+  
+  for (int i = 0; i < TOTOAL_CARDS; i++ ){
+  bars[i].currentHeight = 0;}
+  
   println("mode = annual fee");  
   }
   
