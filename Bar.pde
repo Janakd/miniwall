@@ -10,7 +10,7 @@ class Bar{
        x = bx-47; 
        y = by-50;
        finalHeight = -bb;
-       step = -3;
+       step = -2;
        a = 100;
   }
   
@@ -22,10 +22,7 @@ class Bar{
    if (currentHeight > finalHeight){  
        currentHeight = currentHeight + step ;
    }
-//  else if (currentHeight < finalHeight){  
-//       currentHeight = currentHeight - step ;
-//   } 
-   
+
   }
   
   void render (){

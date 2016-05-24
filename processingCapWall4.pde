@@ -93,7 +93,7 @@ void setup() {
     cards[i].credit = xmlCards[i].getFloat("credit");
     cards[i].annual = xmlCards[i].getFloat("annual");
     bars[i] = new Bar(cards[i].x, cards[i].y, cards[i].credit);
-
+    cards[i].creditword = xmlCards[i].getString("creditword");
   }
 
   // taking care of saving json file 
@@ -159,20 +159,24 @@ void draw() {
 
       case MODE_CREDIT:
         //draw Credit bars
-       
         bars[i].finalHeight = -cards[i].credit;
-        //bars[i].currentHeight = 0;
         bars[i].update();
         bars[i].render();
+        
+        textSize(13);
+        text ("CREDIT SCORE", 70, 230, 170, 200);
+        text (cards[i].creditword, cards[i].x-50, cards[i].y-70+bars[i].currentHeight);
         break;
         
       case MODE_FEE:
         //draw Annual fee bars
-        //float newHeight = 0;
-        //bars[i].currentHeight = 0;
         bars[i].finalHeight = -cards[i].annual; 
         bars[i].update();
         bars[i].render();
+        
+        textSize(13);
+        text ("ANNUAL FEE", 70, 230, 170, 200);
+        text ("$" + int(cards[i].annual-10), cards[i].x-50, cards[i].y-70+bars[i].currentHeight);
         break;
       }
     }

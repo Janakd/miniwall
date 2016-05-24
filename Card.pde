@@ -36,7 +36,9 @@ class Card {
   String desc;
   float credit;
   float annual;
+  String creditword;
   int timerEnd;
+  
      
 
   //which card it is on the board (0-29)
